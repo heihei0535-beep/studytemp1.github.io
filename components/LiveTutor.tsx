@@ -16,23 +16,44 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const nextStartTimeRef = useRef<number>(0);
 
+  // Initialize AudioContext only when needed or on mount, but handle errors gracefully
   useEffect(() => {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
-    return () => { audioContextRef.current?.close(); };
+    try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+            audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
+        }
+    } catch (e) {
+        console.error("AudioContext not supported or failed to initialize", e);
+    }
+    
+    return () => { 
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+            audioContextRef.current.close().catch(console.error); 
+        }
+    };
   }, []);
 
   const toggleConnection = async () => {
     if (isConnected) {
-      clientRef.current?.disconnect();
+      if (clientRef.current) {
+        clientRef.current.disconnect();
+        clientRef.current = null;
+      }
       setIsConnected(false);
       setIsPlaying(false);
       return;
     }
 
     setError(null);
+    
+    // Ensure AudioContext is ready
     if (audioContextRef.current?.state === 'suspended') {
-      await audioContextRef.current.resume();
+      try {
+        await audioContextRef.current.resume();
+      } catch (e) {
+        console.error("Failed to resume AudioContext", e);
+      }
     }
     
     clientRef.current = new LiveTutorClient(lesson, {
@@ -42,7 +63,7 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
         setIsPlaying(false);
       },
       onError: (err) => {
-        setError("Mic Error");
+        setError("Mic/Net Error");
         setIsConnected(false);
       },
       onAudioData: async (base64Data) => {
@@ -70,7 +91,10 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
 
   useEffect(() => {
     return () => {
-      if (clientRef.current) clientRef.current.disconnect();
+      if (clientRef.current) {
+          clientRef.current.disconnect();
+          clientRef.current = null;
+      }
     };
   }, [lesson.id]);
 
