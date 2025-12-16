@@ -3,61 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LinguaSpark - AI 语言私教</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <title>LinguaSpark - Classics</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✒️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              academy: {
-                50: '#f4f6f8',
-                100: '#e4e8ec',
-                200: '#cdd5db',
-                300: '#a7b5be',
-                400: '#7d929f',
-                500: '#5f7584',
-                600: '#4b5d6b',
-                700: '#3e4c57',
-                800: '#354049',
-                900: '#1a202c', // Dark slate
+              paper: {
+                50: '#fdfbf7', // Warm paper
+                100: '#f5f2eb',
+                200: '#e6e2d6',
+                300: '#d1cdc0',
+                900: '#1c1917',
               },
-              paper: '#fdfbf7', // Warm paper color
+              ink: {
+                400: '#57534e',
+                500: '#44403c',
+                800: '#292524',
+                900: '#0c0a09', // Almost black
+              },
+              accent: {
+                500: '#b91c1c', // Academic Red
+                600: '#991b1b',
+              }
             },
             fontFamily: {
               sans: ['Inter', 'system-ui', 'sans-serif'],
-              serif: ['Merriweather', 'Georgia', 'serif'],
+              serif: ['Merriweather', 'Georgia', 'serif'], // Primary font for content
+            },
+            boxShadow: {
+              'book': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+              'float': '0 20px 40px -4px rgba(0, 0, 0, 0.1), 0 8px 16px -4px rgba(0, 0, 0, 0.05)',
             }
           }
         }
       }
     </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@300;400;700;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap');
       
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #f4f6f8;
-        color: #1a202c;
+        background-color: #fdfbf7;
+        color: #1c1917;
+        -webkit-font-smoothing: antialiased;
       }
       
-      /* Smooth scrolling */
-      html {
-        scroll-behavior: smooth;
+      .font-serif {
+        font-family: 'Merriweather', serif;
       }
 
-      /* Custom scrollbar */
+      /* Custom scrollbar matching paper theme */
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
+        background: #d6d3c9;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a8a29e;
       }
     </style>
     <script type="importmap">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Book, ChevronRight, Library, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { Book, Bookmark, Star } from 'lucide-react';
 import { Lesson } from '../types';
 import { lessons } from '../data/lessons';
 
@@ -12,41 +12,38 @@ export const LessonSelector: React.FC<LessonSelectorProps> = ({ currentLesson, o
   const [activeBook, setActiveBook] = useState<number>(1);
 
   const books = [
-    { id: 1, name: 'Book 1', desc: '初阶' },
-    { id: 2, name: 'Book 2', desc: '进阶' },
-    { id: 3, name: 'Book 3', desc: '高阶' },
-    { id: 5, name: 'IELTS', desc: '雅思', isSpecial: true },
+    { id: 1, name: 'Book I' },
+    { id: 2, name: 'Book II' },
+    { id: 3, name: 'Book III' },
+    { id: 5, name: 'IELTS' },
   ];
 
   const filteredLessons = lessons.filter(l => l.book === activeBook);
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-academy-900">
+    <div className="flex-1 flex flex-col min-h-0">
       
-      {/* Book Tabs */}
-      <div className="px-4 py-4 border-b border-academy-800 bg-academy-900">
-        <div className="flex space-x-1 bg-academy-800 p-1 rounded-lg">
+      {/* Elegant Tabs */}
+      <div className="px-6 py-6 pb-2">
+        <div className="flex gap-4 border-b border-paper-300 pb-px overflow-x-auto no-scrollbar">
           {books.map((book) => (
             <button
               key={book.id}
               onClick={() => setActiveBook(book.id)}
-              className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${
+              className={`pb-3 text-xs font-serif font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
                 activeBook === book.id
-                  ? (book.isSpecial ? 'bg-purple-600 text-white shadow' : 'bg-blue-600 text-white shadow')
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-academy-700'
+                  ? 'text-ink-900 border-b-2 border-accent-600 mb-[-1px]'
+                  : 'text-ink-400 hover:text-ink-600'
               }`}
             >
               {book.name}
             </button>
           ))}
         </div>
-        <div className="mt-2 text-center text-xs text-gray-500">
-            {books.find(b => b.id === activeBook)?.desc} 课程
-        </div>
       </div>
 
-      {/* Lesson List */}
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+      {/* List Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
         {filteredLessons.length > 0 ? (
           filteredLessons.map((lesson) => {
             const isActive = currentLesson.id === lesson.id;
@@ -54,36 +51,39 @@ export const LessonSelector: React.FC<LessonSelectorProps> = ({ currentLesson, o
               <button
                 key={lesson.id}
                 onClick={() => onSelectLesson(lesson)}
-                className={`group w-full text-left px-3 py-3 rounded-lg flex items-center justify-between transition-all duration-200 border border-transparent ${
+                className={`w-full text-left px-4 py-4 rounded-lg flex items-start gap-4 transition-all duration-200 group border border-transparent ${
                   isActive
-                    ? 'bg-academy-800 border-academy-700 shadow-md'
-                    : 'hover:bg-academy-800/50 hover:border-academy-800'
+                    ? 'bg-white shadow-book border-paper-200'
+                    : 'hover:bg-paper-200/50'
                 }`}
               >
-                <div className="flex items-center space-x-3 min-w-0">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
-                      isActive 
-                      ? (lesson.book === 5 ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white')
-                      : 'bg-academy-700 text-gray-400 group-hover:bg-academy-600'
+                {/* Number */}
+                <span className={`
+                  font-serif text-lg font-bold w-6 text-center leading-none mt-0.5
+                  ${isActive ? 'text-accent-600' : 'text-paper-300 group-hover:text-ink-400'}
+                `}>
+                  {lesson.unit}
+                </span>
+                
+                <div className="min-w-0 flex-1">
+                  <h3 className={`font-serif text-base font-bold truncate transition-colors leading-tight ${
+                    isActive ? 'text-ink-900' : 'text-ink-600'
                   }`}>
-                    {lesson.book === 5 ? 'I' : lesson.unit}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={`text-sm font-medium truncate ${isActive ? 'text-white' : 'text-gray-300 group-hover:text-gray-200'}`}>
-                      {lesson.title}
-                    </p>
-                  </div>
+                    {lesson.title}
+                  </h3>
+                  <p className="text-[11px] text-ink-400 mt-1.5 uppercase tracking-wide">
+                    {lesson.book === 5 ? 'Speaking Practice' : 'Essential Grammar'}
+                  </p>
                 </div>
-                {isActive && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                )}
+
+                {isActive && <Bookmark size={16} className="text-accent-600 fill-current" />}
               </button>
             );
           })
         ) : (
-          <div className="py-12 text-center">
-            <Library className="mx-auto text-academy-700 mb-2" size={32} />
-            <p className="text-sm text-academy-500">暂无课程</p>
+          <div className="py-20 text-center opacity-40">
+            <Book className="mx-auto mb-3 text-ink-300" size={24} />
+            <p className="font-serif text-ink-400 text-sm italic">No lessons available</p>
           </div>
         )}
       </div>

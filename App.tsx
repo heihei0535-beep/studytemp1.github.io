@@ -11,37 +11,38 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-academy-50 overflow-hidden font-sans text-gray-900">
+    <div className="flex h-screen w-full bg-paper-50 text-ink-900 overflow-hidden">
       
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-academy-900 text-white border-b border-academy-800 px-4 h-14 flex items-center justify-between shadow-md">
+      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-paper-50/90 backdrop-blur-sm border-b border-paper-200 px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GraduationCap className="text-blue-400" size={20} /> 
-          <span className="font-serif font-bold tracking-wide">LinguaSpark</span>
+          <GraduationCap size={24} className="text-ink-900" />
+          <span className="font-serif font-bold text-lg">LinguaSpark</span>
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-          className="p-2 text-gray-300 hover:text-white transition-colors"
+          className="p-2 text-ink-500 hover:text-ink-900 transition-colors"
         >
-          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Sidebar Navigation (Dark Theme) */}
-      <div className={`
-        fixed md:relative z-40 h-full w-72 bg-academy-900 text-gray-300 border-r border-academy-800 shadow-2xl
-        transition-transform duration-300 ease-in-out transform 
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+      {/* Sidebar - Academic Style */}
+      <aside className={`
+        fixed md:relative z-40 h-full w-80 bg-paper-100 border-r border-paper-200
+        transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] transform 
+        ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} 
         md:translate-x-0 flex-shrink-0 flex flex-col
       `}>
-        {/* Desktop Sidebar Header */}
-        <div className="hidden md:flex items-center h-16 px-6 bg-academy-900 border-b border-academy-800 shadow-sm z-10">
+        {/* Logo Area */}
+        <div className="hidden md:flex flex-col justify-center h-24 px-8 border-b border-paper-200/50">
              <div className="flex items-center gap-3">
-               <div className="bg-blue-600/20 p-1.5 rounded-lg text-blue-400 border border-blue-500/30">
+               <div className="w-10 h-10 bg-ink-900 rounded-full flex items-center justify-center text-paper-50 shadow-md">
                  <GraduationCap size={20} />
                </div>
                <div>
-                 <h1 className="font-serif font-bold text-lg text-white tracking-wide leading-none">LinguaSpark</h1>
+                 <h1 className="font-serif font-bold text-xl text-ink-900 tracking-tight">LinguaSpark</h1>
+                 <p className="text-[10px] text-ink-500 font-medium tracking-widest uppercase mt-0.5">Classic Edition</p>
                </div>
              </div>
         </div>
@@ -54,31 +55,24 @@ function App() {
           }} 
         />
         
-        {/* User Profile / Status */}
-        <div className="p-4 bg-academy-950 border-t border-academy-800">
-          <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity cursor-pointer">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-academy-800">
-              AI
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-bold text-gray-200">Gemini 2.5 Flash</p>
-              <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Online
-              </p>
-            </div>
+        {/* User Profile - Subtle */}
+        <div className="p-6 border-t border-paper-200 bg-paper-100">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <p className="text-xs font-medium text-ink-500 font-mono">Gemini 2.5 Active</p>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative w-full overflow-hidden bg-academy-50">
-        <div className="md:hidden h-14 flex-shrink-0 bg-academy-900"></div> {/* Spacer for mobile header */}
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col relative w-full overflow-hidden bg-paper-50">
+        <div className="md:hidden h-16 flex-shrink-0"></div> 
         
         <div className="flex-1 relative overflow-hidden flex flex-col">
            <ContentArea lesson={currentLesson} />
         </div>
 
-        {/* Live Tutor Bar (Fixed Bottom) */}
+        {/* Floating Live Tutor Bar */}
         <LiveTutor lesson={currentLesson} />
 
       </main>
@@ -86,7 +80,7 @@ function App() {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-30 md:hidden transition-opacity"
+          className="fixed inset-0 bg-ink-900/10 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
