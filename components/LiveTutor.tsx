@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Mic, MicOff, Volume2, Radio } from 'lucide-react';
+import { Mic, MicOff, Zap, Activity, X } from 'lucide-react';
 import { Lesson } from '../types';
 import { LiveTutorClient, decode, decodeAudioData } from '../services/geminiService';
 
@@ -11,6 +11,7 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   const clientRef = useRef<LiveTutorClient | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -19,7 +20,9 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
 
   // Setup Audio Output Context
   useEffect(() => {
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
+    
     return () => {
       audioContextRef.current?.close();
     };
@@ -30,10 +33,17 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
       clientRef.current?.disconnect();
       setIsConnected(false);
       setIsPlaying(false);
+      setIsExpanded(false);
       return;
     }
 
     setError(null);
+    setIsExpanded(true); // Auto expand on connect
+
+    // Resume AudioContext on user interaction
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
     
     // Initialize Client
     clientRef.current = new LiveTutorClient(lesson, {
@@ -45,7 +55,12 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
         setIsPlaying(false);
       },
       onError: (err) => {
-        setError(err.message || "连接错误");
+        if (err.name === 'NotAllowedError') {
+             setError("需麦克风权限");
+        } else {
+             setError("连接中断");
+             console.error(err);
+        }
         setIsConnected(false);
       },
       onAudioData: async (base64Data) => {
@@ -54,7 +69,6 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
         setIsPlaying(true);
         const ctx = audioContextRef.current;
         
-        // Use max of nextStartTime or currentTime to ensure gapless or immediate playback
         nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
 
         try {
@@ -89,69 +103,109 @@ export const LiveTutor: React.FC<LiveTutorProps> = ({ lesson }) => {
     await clientRef.current.connect();
   };
 
-  // Cleanup on unmount or lesson change
   useEffect(() => {
     return () => {
-      if (clientRef.current) {
-        clientRef.current.disconnect();
-      }
+      if (clientRef.current) clientRef.current.disconnect();
       sourcesRef.current.forEach(s => s.stop());
     };
   }, [lesson.id]);
 
-  return (
-    <div className="bg-white rounded-2xl shadow-xl border border-brand-100 p-6 flex flex-col items-center justify-center space-y-6 min-h-[300px]">
-      <div className="text-center">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">AI 实时外教</h3>
-        <p className="text-gray-500 text-sm">与 AI 老师一对一练习《{lesson.title}》口语。</p>
-      </div>
+  // Collapsed State (Just a FAB)
+  if (!isExpanded && !isConnected) {
+    return (
+      <button
+        onClick={handleToggleConnection}
+        className="group flex items-center justify-center w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg hover:bg-brand-700 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-200"
+        title="开启 AI 语音外教"
+      >
+        <Mic size={24} className="group-hover:animate-bounce" />
+      </button>
+    );
+  }
 
-      <div className="relative">
-        {/* Visual Pulse Effect */}
-        {isConnected && (
-          <div className="absolute inset-0 bg-brand-500 rounded-full animate-ping opacity-20"></div>
-        )}
-        
-        <button
-          onClick={handleToggleConnection}
-          className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
-            isConnected 
-              ? 'bg-red-500 hover:bg-red-600 shadow-red-200' 
-              : 'bg-brand-600 hover:bg-brand-700 shadow-brand-200'
-          } shadow-xl text-white`}
+  // Expanded / Active State (Dynamic Island Panel)
+  return (
+    <div className={`
+      bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/50 
+      transition-all duration-500 ease-out overflow-hidden
+      ${isConnected ? 'ring-2 ring-brand-500/50' : ''}
+      w-full md:w-80
+    `}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+          <span className="text-sm font-bold text-gray-700">AI 语音外教</span>
+        </div>
+        <button 
+          onClick={() => {
+            if (isConnected) handleToggleConnection();
+            setIsExpanded(false);
+          }}
+          className="text-gray-400 hover:text-gray-600 transition-colors"
         >
-          {isConnected ? (
-            <MicOff size={32} />
-          ) : (
-            <Mic size={32} />
-          )}
+          <X size={16} />
         </button>
       </div>
 
-      <div className="h-8 flex items-center justify-center space-x-2">
-        {isConnected ? (
-          <>
-            <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-500 animate-bounce' : 'bg-gray-300'}`}></div>
-            <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-500 animate-bounce delay-75' : 'bg-gray-300'}`}></div>
-            <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-500 animate-bounce delay-150' : 'bg-gray-300'}`}></div>
-            <span className="text-sm font-medium text-gray-600 ml-2">
-              {isPlaying ? 'AI 正在说...' : '正在听...'}
-            </span>
-          </>
-        ) : (
-          <span className="text-sm text-gray-400">点击麦克风开始对话</span>
-        )}
+      {/* Main Content */}
+      <div className="p-5 flex flex-col items-center space-y-5">
+        
+        {/* Visualizer Circle */}
+        <div className="relative group">
+          {isConnected && (
+            <>
+              <div className={`absolute inset-0 bg-brand-500 rounded-full opacity-20 blur-xl transition-all duration-300 ${isPlaying ? 'scale-150' : 'scale-100'}`}></div>
+              <div className={`absolute inset-0 border-2 border-brand-200 rounded-full animate-[ping_2s_infinite] opacity-30`}></div>
+            </>
+          )}
+          
+          <button
+            onClick={handleToggleConnection}
+            className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
+              isConnected 
+                ? 'bg-gradient-to-b from-red-500 to-red-600 text-white hover:shadow-red-200' 
+                : 'bg-gradient-to-b from-brand-500 to-brand-600 text-white hover:shadow-brand-200'
+            }`}
+          >
+            {isConnected ? (
+              isPlaying ? <Activity size={32} className="animate-pulse" /> : <MicOff size={28} />
+            ) : (
+              <Mic size={28} />
+            )}
+          </button>
+        </div>
+
+        {/* Status Text */}
+        <div className="text-center space-y-1">
+          {error ? (
+            <p className="text-red-500 text-sm font-medium animate-pulse">{error}</p>
+          ) : isConnected ? (
+            <>
+              <p className="text-brand-900 font-bold text-base">
+                {isPlaying ? '正在说话...' : '聆听中...'}
+              </p>
+              <p className="text-gray-500 text-xs">
+                {isPlaying ? '请仔细听' : '请回答问题或朗读'}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-800 font-medium">准备好了吗？</p>
+              <p className="text-gray-500 text-xs">点击麦克风开始《{lesson.title}》练习</p>
+            </>
+          )}
+        </div>
       </div>
 
-      {error && (
-        <div className="p-3 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100 max-w-xs text-center">
-          {error}
+      {/* Footer Hint */}
+      {isConnected && (
+        <div className="bg-brand-50/50 px-4 py-2 text-center border-t border-brand-100/50">
+          <p className="text-[10px] text-brand-600 font-medium flex items-center justify-center gap-1">
+            <Zap size={10} /> 全程英语交流，遇阻可讲中文
+          </p>
         </div>
       )}
-
-      <div className="bg-brand-50 p-4 rounded-xl w-full text-xs text-gray-600">
-        <strong>提示：</strong> 试着朗读一句课文，或者用中文问老师一个单词的意思！
-      </div>
     </div>
   );
 };

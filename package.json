@@ -1,5 +1,5 @@
 {
-  "name": "linguaspark---nce-ai-master",
+  "name": "linguaspark---nce-&-ielts-ai",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,8 +11,8 @@
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "@google/genai": "^1.33.0",
-    "lucide-react": "^0.561.0"
+    "@google/genai": "0.0.12",
+    "lucide-react": "0.294.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

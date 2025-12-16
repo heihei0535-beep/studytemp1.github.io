@@ -6,19 +6,38 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 // --- Standard Generation ---
 
 export const explainText = async (lesson: Lesson, query: string): Promise<string> => {
+  const isIELTS = lesson.book === 5;
+  
   try {
-    const prompt = `
-      你是一位精通“新概念英语”的资深英语老师。
-      当前课程: 第 ${lesson.book} 册, 第 ${lesson.unit} 课 - "${lesson.title}".
-      课文内容: "${lesson.content}"
-      语法重点: ${lesson.grammarPoints.join(', ')}.
+    let prompt = "";
+    
+    if (isIELTS) {
+      prompt = `
+        你是一位资深的雅思考官（IELTS Examiner）。
+        当前练习主题: "${lesson.title}"
+        相关内容/参考答案: "${lesson.content}"
+        考察重点: ${lesson.grammarPoints.join(', ')}.
 
-      学生问题: "${query}"
+        学生问题: "${query}"
 
-      请针对提供的课文内容，用中文提供简洁、有帮助的解释。
-      解释语法点时要深入浅出，适合中国学生理解。
-      使用 Markdown 格式进行排版。
-    `;
+        请针对雅思评分标准（流利度与连贯性、词汇多样性、语法多样性及准确性、发音）进行回答。
+        如果是口语练习，请给出高分表达建议。如果是听力，请解析考点。
+        使用 Markdown 格式排版，重点突出，风格专业但鼓励性强。
+      `;
+    } else {
+      prompt = `
+        你是一位精通“新概念英语”的资深英语老师。
+        当前课程: 第 ${lesson.book} 册, 第 ${lesson.unit} 课 - "${lesson.title}".
+        课文内容: "${lesson.content}"
+        语法重点: ${lesson.grammarPoints.join(', ')}.
+
+        学生问题: "${query}"
+
+        请针对提供的课文内容，用中文提供简洁、有帮助的解释。
+        解释语法点时要深入浅出，适合中国学生理解。
+        使用 Markdown 格式进行排版。
+      `;
+    }
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -33,15 +52,11 @@ export const explainText = async (lesson: Lesson, query: string): Promise<string
 
 export const generateLessonImage = async (lesson: Lesson): Promise<string | null> => {
   try {
-    const prompt = `A realistic, high-quality illustration of the following scene from an English textbook story: ${lesson.content}. No text in the image. Artistic style: Digital painting, detailed.`;
+    const prompt = `A realistic, high-quality illustration of the following scene from an English learning material: ${lesson.content}. No text in the image. Artistic style: Digital painting, detailed.`;
     
-    // Using generateContent with image model as per guidelines for standard implementation
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: prompt,
-      config: {
-        // Nano banana models don't support responseMimeType
-      }
     });
 
     for (const part of response.candidates?.[0]?.content?.parts || []) {
@@ -132,6 +147,24 @@ export class LiveTutorClient {
   async connect() {
     if (this.isActive) return;
 
+    const isIELTS = this.lesson.book === 5;
+    
+    // Customize System Instruction based on lesson type
+    const systemInstruction = isIELTS 
+      ? `You are a professional IELTS Examiner conducting a mock speaking test or practice session. 
+         Current Topic: ${this.lesson.title}. 
+         Content Reference: ${this.lesson.content}.
+         Your goal: Ask the user questions related to the topic. Act formally but politely, like a real examiner.
+         Evaluate their answers for Fluency, Lexical Resource, Grammatical Range, and Pronunciation.
+         If they struggle, provide gentle guidance or higher-level vocabulary suggestions.
+         Keep the conversation flowing.`
+      : `You are a supportive, encouraging English tutor helping a Chinese student practice New Concept English. 
+         Current Lesson: ${this.lesson.title}. 
+         Content: ${this.lesson.content}.
+         Your goal: Roleplay the scenario in the text if applicable, or ask the user questions about the text. 
+         Correct their pronunciation and grammar gently. Speak clearly and slowly.
+         Important: Primarily speak English to help the student learn, but if the student is confused, you can briefly explain in Chinese.`;
+
     try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -150,11 +183,6 @@ export class LiveTutorClient {
             if (audioData) {
               this.callbacks.onAudioData(audioData);
             }
-            
-            // Transcription logic
-            if (message.serverContent?.turnComplete && this.callbacks.onTranscription) {
-                 // Simplified for this demo: actual implementation would aggregate partials
-            }
           },
           onclose: () => {
             this.isActive = false;
@@ -166,12 +194,7 @@ export class LiveTutorClient {
         },
         config: {
           responseModalities: [Modality.AUDIO],
-          systemInstruction: `You are a supportive, encouraging English tutor helping a Chinese student practice New Concept English. 
-          Current Lesson: ${this.lesson.title}. 
-          Content: ${this.lesson.content}.
-          Your goal: Roleplay the scenario in the text if applicable, or ask the user questions about the text. 
-          Correct their pronunciation and grammar gently. Speak clearly and slowly.
-          Important: Primarily speak English to help the student learn, but if the student is confused, you can briefly explain in Chinese.`,
+          systemInstruction: systemInstruction,
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
           },

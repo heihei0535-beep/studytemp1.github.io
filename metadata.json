@@ -1,6 +1,6 @@
 {
-  "name": "LinguaSpark - NCE AI Master",
-  "description": "A next-generation New Concept English learning platform featuring Gemini Live for real-time voice tutoring, scene visualization, and deep grammar analysis.",
+  "name": "LinguaSpark - NCE & IELTS AI",
+  "description": "Comprehensive English learning platform covering New Concept English and IELTS prep with real-time AI tutoring.",
   "requestFramePermissions": [
     "microphone"
   ]
