@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Book, ChevronRight, Library, GraduationCap } from 'lucide-react';
+import { Book, ChevronRight, Library, GraduationCap, CheckCircle2 } from 'lucide-react';
 import { Lesson } from '../types';
 import { lessons } from '../data/lessons';
 
@@ -11,97 +11,81 @@ interface LessonSelectorProps {
 export const LessonSelector: React.FC<LessonSelectorProps> = ({ currentLesson, onSelectLesson }) => {
   const [activeBook, setActiveBook] = useState<number>(1);
 
-  // Define books structure
   const books = [
-    { id: 1, name: '第一册', desc: '英语初阶' },
-    { id: 2, name: '第二册', desc: '实践与进步' },
-    { id: 3, name: '第三册', desc: '培养技能' },
-    { id: 4, name: '第四册', desc: '流利英语' },
-    { id: 5, name: '雅思专区', desc: '听力与口语', isSpecial: true },
+    { id: 1, name: 'Book 1', desc: '初阶' },
+    { id: 2, name: 'Book 2', desc: '进阶' },
+    { id: 3, name: 'Book 3', desc: '高阶' },
+    { id: 5, name: 'IELTS', desc: '雅思', isSpecial: true },
   ];
 
-  // Filter lessons based on active book
   const filteredLessons = lessons.filter(l => l.book === activeBook);
 
   return (
-    <div className="w-full md:w-80 bg-white border-r border-gray-200 h-full flex flex-col">
-      {/* Main Menu (Book Selector) */}
-      <div className="p-4 bg-gray-50 border-b border-gray-200">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-          <Library size={14} className="mr-1" /> 课程选择
-        </h2>
-        <div className="grid grid-cols-2 gap-2">
+    <div className="flex-1 flex flex-col min-h-0 bg-academy-900">
+      
+      {/* Book Tabs */}
+      <div className="px-4 py-4 border-b border-academy-800 bg-academy-900">
+        <div className="flex space-x-1 bg-academy-800 p-1 rounded-lg">
           {books.map((book) => (
             <button
               key={book.id}
               onClick={() => setActiveBook(book.id)}
-              className={`px-3 py-2 text-sm rounded-lg border transition-all duration-200 text-left relative overflow-hidden ${
+              className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${
                 activeBook === book.id
-                  ? (book.isSpecial ? 'bg-purple-600 border-purple-700 text-white shadow-md' : 'bg-brand-500 border-brand-600 text-white shadow-md')
-                  : 'bg-white border-gray-200 text-gray-700 hover:border-brand-300 hover:bg-brand-50'
+                  ? (book.isSpecial ? 'bg-purple-600 text-white shadow' : 'bg-blue-600 text-white shadow')
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-academy-700'
               }`}
             >
-              <div className="font-bold relative z-10">{book.name}</div>
-              <div className={`text-xs relative z-10 ${activeBook === book.id ? 'text-white/80' : 'text-gray-400'}`}>
-                {book.desc}
-              </div>
-              {book.isSpecial && activeBook !== book.id && (
-                 <div className="absolute top-0 right-0 p-1 opacity-10">
-                     <GraduationCap size={40} />
-                 </div>
-              )}
+              {book.name}
             </button>
           ))}
+        </div>
+        <div className="mt-2 text-center text-xs text-gray-500">
+            {books.find(b => b.id === activeBook)?.desc} 课程
         </div>
       </div>
 
       {/* Lesson List */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100">
-          <h3 className="text-xs font-semibold text-gray-400">
-            {books.find(b => b.id === activeBook)?.name} 目录
-          </h3>
-        </div>
-        
-        <div className="py-2">
-          {filteredLessons.length > 0 ? (
-            filteredLessons.map((lesson) => (
+      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+        {filteredLessons.length > 0 ? (
+          filteredLessons.map((lesson) => {
+            const isActive = currentLesson.id === lesson.id;
+            return (
               <button
                 key={lesson.id}
                 onClick={() => onSelectLesson(lesson)}
-                className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-brand-50 transition-colors ${
-                  currentLesson.id === lesson.id 
-                    ? (lesson.book === 5 ? 'bg-purple-50 border-r-4 border-purple-500' : 'bg-brand-50 border-r-4 border-brand-500') 
-                    : ''
+                className={`group w-full text-left px-3 py-3 rounded-lg flex items-center justify-between transition-all duration-200 border border-transparent ${
+                  isActive
+                    ? 'bg-academy-800 border-academy-700 shadow-md'
+                    : 'hover:bg-academy-800/50 hover:border-academy-800'
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg shrink-0 ${
-                      currentLesson.id === lesson.id 
-                      ? (lesson.book === 5 ? 'bg-purple-200 text-purple-700' : 'bg-brand-200 text-brand-700') 
-                      : 'bg-gray-100 text-gray-500'
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                      isActive 
+                      ? (lesson.book === 5 ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white')
+                      : 'bg-academy-700 text-gray-400 group-hover:bg-academy-600'
                   }`}>
-                    {lesson.book === 5 ? <GraduationCap size={16} /> : <Book size={16} />}
+                    {lesson.book === 5 ? 'I' : lesson.unit}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-500 font-medium">
-                        {lesson.book === 5 ? `Topic ${lesson.unit}` : `第 ${lesson.unit} 课`}
-                    </p>
-                    <p className={`text-sm font-semibold truncate ${currentLesson.id === lesson.id ? (lesson.book === 5 ? 'text-purple-900' : 'text-brand-900') : 'text-gray-700'}`}>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-medium truncate ${isActive ? 'text-white' : 'text-gray-300 group-hover:text-gray-200'}`}>
                       {lesson.title}
                     </p>
                   </div>
                 </div>
-                {currentLesson.id === lesson.id && <ChevronRight size={16} className={lesson.book === 5 ? "text-purple-500 shrink-0" : "text-brand-500 shrink-0"} />}
+                {isActive && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
+                )}
               </button>
-            ))
-          ) : (
-            <div className="p-8 text-center text-gray-400 text-sm">
-              <p>暂无该区域课程</p>
-              <p className="text-xs mt-1">(即将上线)</p>
-            </div>
-          )}
-        </div>
+            );
+          })
+        ) : (
+          <div className="py-12 text-center">
+            <Library className="mx-auto text-academy-700 mb-2" size={32} />
+            <p className="text-sm text-academy-500">暂无课程</p>
+          </div>
+        )}
       </div>
     </div>
   );

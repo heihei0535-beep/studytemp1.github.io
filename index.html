@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LinguaSpark - 新概念 & 雅思 AI 伴侣</title>
+    <title>LinguaSpark - AI 语言私教</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,37 +11,42 @@
         theme: {
           extend: {
             colors: {
-              brand: {
-                50: '#eff6ff',
-                100: '#dbeafe',
-                200: '#bfdbfe',
-                300: '#93c5fd',
-                400: '#60a5fa',
-                500: '#3b82f6',
-                600: '#2563eb',
-                700: '#1d4ed8',
-                800: '#1e40af',
-                900: '#1e3a8a',
-                950: '#172554',
-              }
+              academy: {
+                50: '#f4f6f8',
+                100: '#e4e8ec',
+                200: '#cdd5db',
+                300: '#a7b5be',
+                400: '#7d929f',
+                500: '#5f7584',
+                600: '#4b5d6b',
+                700: '#3e4c57',
+                800: '#354049',
+                900: '#1a202c', // Dark slate
+              },
+              paper: '#fdfbf7', // Warm paper color
             },
             fontFamily: {
               sans: ['Inter', 'system-ui', 'sans-serif'],
               serif: ['Merriweather', 'Georgia', 'serif'],
-            },
-            animation: {
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             }
           }
         }
       }
     </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@300;400;700;900&display=swap');
+      
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #f8fafc;
+        background-color: #f4f6f8;
+        color: #1a202c;
       }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
       /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 6px;
@@ -53,9 +58,6 @@
       ::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 3px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
       }
     </style>
     <script type="importmap">
